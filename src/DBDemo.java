@@ -218,8 +218,8 @@ public class DBDemo {
                             " d.abbreviation \r\n" +
                             "FROM Section s\r\n" +
                             "JOIN Professor p\r\n" +
-                            "JOIN Department d\r\n" +
-                            "JOIN Teaches t ON s.sectionID=t.sectionID\r\n" +
+                            "JOIN (SELECT abbreviation, deptID FROM Department) as d\r\n" +
+                            "JOIN Teaches t ON s.sectionID=t.sectionID \r\n" +
                             "JOIN Course c ON s.courseID=c.courseID\r\n" +
                             "WHERE t.professorID= ? AND p.professorID=? AND d.deptID=p.dept;";
             PreparedStatement pstmt = conn.prepareStatement(viewCoursesByProf);
