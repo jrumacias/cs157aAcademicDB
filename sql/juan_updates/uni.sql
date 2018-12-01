@@ -67,7 +67,7 @@ DROP TABLE IF EXISTS Grade;
 CREATE TABLE Grade (
 	sectionID INT,
 	studentID INT,
-	grade INT,
+	grade VARCHAR(2),
 	updatedAt DATETIME,
 	PRIMARY KEY (sectionID, studentID),
 	FOREIGN KEY (sectionID) REFERENCES Section (sectionID),
