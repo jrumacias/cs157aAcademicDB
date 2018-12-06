@@ -105,15 +105,19 @@ public class DBDemo {
 		Connection conn = null;
 		try {
 			conn = this.getConnection();
-			System.out.println("SUCCESS: Connected to database.");
+			System.out.println("SUCCESS: Connected to database.\n");
 			// User Request #1: View all course offerings.
 			viewCourses(conn);
-            System.out.println("\n");
             // User Request #2: Check grades, specific student.
 			checkGrades(conn, 100017);
-            System.out.println("\n\n");
             // User Request #3: Search for courses by professor
             viewCoursesByProf(conn, 400);
+            // User Request #4: Search for courses containing a keyword
+            search(conn, "course", "courseName", "Introduction");
+            // User Request #5: Enroll student in a section
+            enroll(conn, 100004, 10004);
+            // User Request #6: Search for courses containing keyword1 or keyword2
+            unionSearch(conn, "course", "courseName", "courseName", "Biology", "Chemistry");
 
 		} catch (SQLException e) {
 //			System.out.println("ERROR: Could not connect to the database");
@@ -140,7 +144,6 @@ public class DBDemo {
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery(viewCourses);
 			
-			// TODO: make result format pretty
             System.out.println("Retrieving all course offerings...");
 
             System.out.println("-----------------------------------------" +
@@ -203,7 +206,7 @@ public class DBDemo {
 			}
             System.out.println("-----------------------------------------" +
                     "---------------------------------------------");
-            System.out.println("Done.");
+            System.out.println("Done.\n");
 			rs.close();
 		} catch(SQLException e) {
 			System.out.println("ERROR: Could not check grades");
@@ -227,7 +230,6 @@ public class DBDemo {
             pstmt.setInt(2, profID);
             ResultSet rs = pstmt.executeQuery();
 
-            // TODO: make result format pretty
             System.out.println("Retrieving all course offerings by Professor " + profID + "...");
 
             System.out.println("-----------------------------------------" +
@@ -259,6 +261,114 @@ public class DBDemo {
             e.printStackTrace();
         }
     }
+	
+	//searches database for any course title containing keyWord
+	public void search(Connection con, String table, String column, String keyWord) {
+		
+		Statement stmt = null;
+		String query = "select * from " + table + " WHERE " + column + " LIKE " + "\'%"+ keyWord + "%\'"; 
+		try {
+			stmt = con.createStatement();
+			ResultSet rs = stmt.executeQuery(query);
+			
+			System.out.println("Retrieving all course offerings containing the keyword \"" + keyWord + "\"...");
+            System.out.println("-----------------------------------------" +
+                    "---------------------------------------------");
+			
+			while (rs.next()) {
+				int courseID = rs.getInt("courseID");
+				int deptID = rs.getInt("deptID");
+				String courseNo = rs.getString("courseNo");
+				String courseName = rs.getString("courseName");
+
+				System.out.println("courseId: " + courseID + ", deptId: " + deptID + ", courseNo: "
+						   + courseNo + ", courseName:" + courseName);
+			}
+			
+            System.out.println("-----------------------------------------" +
+                    "---------------------------------------------");
+            System.out.println("Done.\n");
+			
+			rs.close();
+		} catch (SQLException e) {
+			System.out.println("Could not return courses");
+			e.printStackTrace();
+		}
+	}
+	
+	public void enroll(Connection con, int studentID, int sectionID) {
+		//first check to see if studentID is valid
+		Statement stmt = null;
+		String getStudents = "select * from student where studentID = " + studentID;
+		String getSection = "select * from section where sectionID = " + sectionID;
+		
+		System.out.println("Enrolling student " + studentID + " in section " + sectionID + "...");
+
+		try {
+			stmt = con.createStatement();
+			ResultSet rs = stmt.executeQuery(getStudents);
+			if (!rs.next()) {
+				System.out.println("no student with that ID exists");
+				return;
+			}
+			
+			rs = stmt.executeQuery(getSection);
+			if (!rs.next()) {
+				System.out.println("no section with that ID exists");
+				return;
+			}
+			if (rs.getInt("capacity") <= rs.getInt("enrolled")) {
+				System.out.println("section is full");
+				return;
+			}
+			
+			String add = "insert into enrolledIn values (" + sectionID + "," + studentID + ")";
+			stmt.executeUpdate(add);
+			System.out.println("Student : " + studentID + " successfully enrolled in section : " + sectionID);
+			
+		} catch (java.sql.SQLIntegrityConstraintViolationException e) {
+			System.out.println("Student is already enrolled in this section.");
+		} catch (SQLException e) {
+			System.out.println("Student does not exist");
+			e.printStackTrace();
+		} finally {
+			System.out.println("Done.\n");
+		}
+				
+	}
+	
+	//searches for courses that contain either key1 or key2
+	public void unionSearch(Connection con, String table, String firstColumn, String secondColumn, String firstKey, String secondKey) {
+		Statement s1 = null;
+		final String UNION = "union";
+		String q1 = "select * from " + table + " WHERE " + firstColumn + " LIKE " + "\'%"+ firstKey + "%\'";
+		String q2 = "select * from " + table + " WHERE " + secondColumn + " LIKE " + "\'%"+ secondKey + "%\'";
+		
+		try {
+			s1 = con.createStatement();
+			//System.out.println(q1 + UNION + q2);
+			ResultSet rs = s1.executeQuery(q1 + " " + UNION + " "+ q2);
+			
+			System.out.println("Retrieving all course offerings containing the keyword \"" + firstKey + "\" or \"" + secondKey + "\"...");
+            System.out.println("-----------------------------------------" +
+                    "---------------------------------------------");
+			
+			while (rs.next()) {
+				int courseID = rs.getInt("courseID");
+				int deptID = rs.getInt("deptID");
+				String courseNo = rs.getString("courseNo");
+				String courseName = rs.getString("courseName");
+				System.out.println("courseId: " + courseID + ", deptId: " + deptID + ", courseNo: "
+								   + courseNo + ", courseName:" + courseName);
+			}
+            System.out.println("-----------------------------------------" +
+                    "---------------------------------------------");
+            System.out.println("Done.\n");
+		} catch (SQLException e) {
+			System.out.println("Failed to retrieve data");
+			e.printStackTrace();
+		}
+	}
 	
 	/**
 	 * Connect to the DB and do some stuff
