@@ -113,11 +113,15 @@ public class DBDemo {
             // User Request #3: Search for courses by professor
             viewCoursesByProf(conn, 400);
             // User Request #4: Search for courses containing a keyword
-            search(conn, "course", "courseName", "Introduction");
+            searchByKeyword(conn, "course", "courseName", "Introduction");
             // User Request #5: Enroll student in a section
             enroll(conn, 100004, 10004);
             // User Request #6: Search for courses containing keyword1 or keyword2
             unionSearch(conn, "course", "courseName", "courseName", "Biology", "Chemistry");
+            // User Request #7: Drop student from a section
+            drop(conn, 100004, 10004);
+            // User Request #8: View a student's schedule
+            viewSchedule(conn, 100004);
 
 		} catch (SQLException e) {
 //			System.out.println("ERROR: Could not connect to the database");
@@ -263,7 +267,7 @@ public class DBDemo {
     }
 	
 	//searches database for any course title containing keyWord
-	public void search(Connection con, String table, String column, String keyWord) {
+	public void searchByKeyword(Connection con, String table, String column, String keyWord) {
 		
 		Statement stmt = null;
 		String query = "select * from " + table + " WHERE " + column + " LIKE " + "\'%"+ keyWord + "%\'"; 
@@ -325,16 +329,13 @@ public class DBDemo {
 			String add = "insert into enrolledIn values (" + sectionID + "," + studentID + ")";
 			stmt.executeUpdate(add);
 			System.out.println("Student : " + studentID + " successfully enrolled in section : " + sectionID);
-			
+			System.out.println("Done.\n");
 		} catch (java.sql.SQLIntegrityConstraintViolationException e) {
 			System.out.println("Student is already enrolled in this section.");
 		} catch (SQLException e) {
 			System.out.println("Student does not exist");
 			e.printStackTrace();
-		} finally {
-			System.out.println("Done.\n");
 		}
-				
 	}
 	
 	//searches for courses that contain either key1 or key2
@@ -366,6 +367,78 @@ public class DBDemo {
             System.out.println("Done.\n");
 		} catch (SQLException e) {
 			System.out.println("Failed to retrieve data");
+			e.printStackTrace();
+		}
+	}
+	
+	private static void drop(Connection conn, int studentID, int sectionID) {
+		//first check to see if studentID is valid
+		Statement stmt = null;
+		String getStudents = "select * from student where studentID = " + studentID;
+		String getSection = "select * from section where sectionID = " + sectionID;
+		
+		System.out.println("Dropping student " + studentID + " from section " + sectionID + "...");
+
+		try {
+			stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery(getStudents);
+			if (!rs.next()) {
+				System.out.println("no student with that ID exists");
+				return;
+			}
+			
+			rs = stmt.executeQuery(getSection);
+			if (!rs.next()) {
+				System.out.println("no section with that ID exists");
+				return;
+			}
+			
+			String drop = "DELETE FROM EnrolledIn WHERE studentID=" + studentID + " AND sectionID=" + sectionID + ";";
+			stmt.executeUpdate(drop);
+			System.out.println("Student : " + studentID + " successfully dropped from section : " + sectionID);
+			System.out.println("Done.\n");
+		} catch (SQLException e) {
+			System.out.println("Student does not exist");
+			e.printStackTrace();
+		}
+	}
+	
+	private static void viewSchedule(Connection conn, int studentID) {
+		try {
+			String sql = "SELECT Section.sectionID, abbreviation, courseNo, courseName, date, building, roomNo\r\n" + 
+					"FROM EnrolledIn\r\n" + 
+					"JOIN Section ON EnrolledIn.sectionID=Section.sectionID\r\n" + 
+					"JOIN Course ON Section.courseID=Course.courseID\r\n" + 
+					"JOIN Department ON Course.deptID=Department.deptID\r\n" + 
+					"WHERE studentID= ?;\r\n";
+			PreparedStatement pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, studentID);
+			ResultSet rs = pstmt.executeQuery();
+            System.out.println("Retrieving schedule for Student " + studentID + "...");
+
+            System.out.println("-----------------------------------------" +
+                    "---------------------------------------------");
+            System.out.println("Section ID \t\t Course Number \t\t Course Name \t\t Date \t\t Room");
+            System.out.println("-----------------------------------------" +
+                    "---------------------------------------------");
+			
+			while(rs.next()) {
+				String section = rs.getString("sectionID");
+				String abb = rs.getString("abbreviation");
+				String courseNo = rs.getString("courseNo");
+				String courseName = rs.getString("courseName");
+				String date = rs.getString("date");
+				String building = rs.getString("building");
+				String roomNo = rs.getString("roomNo");
+
+                System.out.println(section + "\t\t" + abb + " " + courseNo + "\t\t" + courseName + "\t\t" + date + "\t\t" + building + " " + roomNo);
+			}
+            System.out.println("-----------------------------------------" +
+                    "---------------------------------------------");
+            System.out.println("Done.\n");
+			rs.close();
+		} catch(SQLException e) {
+			System.out.println("ERROR: Could not retrieve schedule.");
 			e.printStackTrace();
 		}
 	}
