@@ -122,6 +122,18 @@ public class DBDemo {
             drop(conn, 100004, 10004);
             // User Request #8: View a student's schedule
             viewSchedule(conn, 100004);
+            // User Request #9: View all professors and their sections (also shows null values)
+            outerJoinSearch(conn);
+            // User Request #10: Add new course
+            newCourse(conn, 9999, 1000, "199A", "New Class");
+            // User Request #11: View the total capacity of combined sections of a course (aggregate function)
+            classSize(conn, 30);
+            // User Request #12: Add new professor
+            newProfessor(conn, "Bobby", "Smith", 1000, "Professor", 2018);
+            // User Request #13: Delete professor
+            deleteProfessor(conn, 506);
+            // User Request #14: Update professor
+            updateProfessor(conn, 500, "Lydia", "Graham", 1000, "Professor", 2000);
 
 		} catch (SQLException e) {
 //			System.out.println("ERROR: Could not connect to the database");
@@ -439,6 +451,205 @@ public class DBDemo {
 			rs.close();
 		} catch(SQLException e) {
 			System.out.println("ERROR: Could not retrieve schedule.");
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * View all professors and the sections they're teaching. Also lists professors that are not 
+	 * teaching any sections.
+	 * @param conn
+	 * @param studentID
+	 */
+	private static void outerJoinSearch(Connection conn) {
+		try {
+			String sql = "SELECT lastName, firstName, Section.sectionID, abbreviation, courseNo FROM Professor\r\n" + 
+					"LEFT OUTER JOIN Teaches ON Professor.professorID=Teaches.professorID\r\n" + 
+					"LEFT OUTER JOIN Section ON Teaches.sectionID=Section.sectionID\r\n" + 
+					"LEFT OUTER JOIN Course ON Section.courseID=Course.courseID\r\n" + 
+					"LEFT OUTER JOIN Department ON Course.deptID=Department.deptID;\r\n";
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery(sql);
+			
+            System.out.println("Retrieving all professors and their course offerings...");
+            System.out.println("-----------------------------------------" +
+                    "---------------------------------------------");
+            System.out.println("Last Name \t\t First Name \t\t Section ID \t\t Course");
+            System.out.println("-----------------------------------------" +
+                    "---------------------------------------------");
+			
+			while(rs.next()) {
+				String last = rs.getString("lastName");
+				String first = rs.getString("firstName");
+				String section = rs.getString("sectionID");
+				String abb = rs.getString("abbreviation");
+				String courseNo = rs.getString("courseNo");
+
+                System.out.println(last + "\t\t" + first + "\t\t" + section + "\t\t" + abb + " " + courseNo);
+			}
+            System.out.println("-----------------------------------------" +
+                    "---------------------------------------------");
+            System.out.println("Done.\n");
+			rs.close();
+		} catch(SQLException e) {
+			System.out.println("ERROR: Could not retrieve schedule.");
+			e.printStackTrace();
+		}
+	}
+	
+	private static void newCourse(Connection conn, int courseID, int deptID, String courseNo, String courseName) {
+		//first check to see if parameters are valid
+		Statement stmt = null;
+		String checkCourseID = "select * from course where courseID = " + courseID;
+		String checkDeptID = "select * from department where deptID= " + deptID;
+		String checkCourseNo = "select * from course where deptID = " + deptID + " and courseNo = '" + courseNo + "';";
+		
+		System.out.println("Adding new course...");
+
+		try {
+			stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery(checkCourseID);
+			if (rs.next()) {
+				System.out.println("A course with that ID already exists.\n");
+				return;
+			}
+			
+			rs = stmt.executeQuery(checkDeptID);
+			if (!rs.next()) {
+				System.out.println("No department with that ID exists.\n");
+				return;
+			}
+			
+			rs = stmt.executeQuery(checkCourseNo);
+			if (rs.next()) {
+				System.out.println("A course with that course number already exists.\n");
+				return;
+			}
+			
+			String addCourse = "insert into course values (" + courseID + ", " + deptID + ", '" + courseNo + "', '" + courseName + "');";
+			stmt.executeUpdate(addCourse);
+			System.out.println("Successfully added the course \"" + courseName + "\"");
+			System.out.println("Done.\n");
+		} catch (SQLException e) {
+			System.out.println("Failed to add new course.");
+			e.printStackTrace();
+		}
+	}
+	
+	private static void classSize(Connection conn, int minSeats) {
+		try {
+			String sql = "SELECT courseID, SUM(capacity) AS totalSeats FROM Section\r\n" + 
+					"GROUP BY courseID\r\n" + 
+					"HAVING totalSeats > ?;";
+			PreparedStatement pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, minSeats);
+			ResultSet rs = pstmt.executeQuery();
+            System.out.println("Retrieving courses with at least " + minSeats + " seats...");
+            System.out.println("-----------------------------------------" +
+                    "---------------------------------------------");
+            System.out.println("Course ID \t\t Capacity");
+            System.out.println("-----------------------------------------" +
+                    "---------------------------------------------");
+			
+			while(rs.next()) {
+				String courseID = rs.getString("courseID");
+				String capacity = rs.getString("totalSeats");
+
+                System.out.println(courseID + "\t\t" + capacity);
+			}
+            System.out.println("-----------------------------------------" +
+                    "---------------------------------------------");
+            System.out.println("Done.\n");
+			rs.close();
+		} catch(SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
+	private static void newProfessor(Connection conn, String first, String last, int dept, String title, int yearHired) {
+		//first check to see if parameters are valid
+		Statement stmt = null;
+		String checkDeptID = "select * from department where deptID= " + dept;
+		
+		System.out.println("Adding new professor...");
+
+		try {
+			stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery(checkDeptID);
+			rs = stmt.executeQuery(checkDeptID);
+			if (!rs.next()) {
+				System.out.println("No department with that ID exists.\n");
+				return;
+			}
+			
+			String addProf = "insert into professor(firstName, lastName, dept, title, yearHired) "
+					+ "values ('" + first + "', '" + last + "', " + dept + ", '" + title + "', " + yearHired + ");";
+			stmt.executeUpdate(addProf);
+			System.out.println("Successfully added " + title + " " + first + " " + last + "\"");
+			System.out.println("Done.\n");
+		} catch (SQLException e) {
+			System.out.println("Failed to add new professor.");
+			e.printStackTrace();
+		}
+	}
+	
+	private static void deleteProfessor(Connection conn, int professorID) {
+		//first check to see if professorID is valid
+		Statement stmt = null;
+		String getProf = "select * from professor where professorID = " + professorID;
+		
+		System.out.println("Removing professor " + professorID + "...");
+
+		try {
+			stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery(getProf);
+			if (!rs.next()) {
+				System.out.println("No professor with that ID exists.\n");
+				return;
+			}
+			
+			String delete = "DELETE FROM Professor WHERE professorID=" + professorID + ";";
+			stmt.executeUpdate(delete);
+			System.out.println("Professor " + professorID + " successfully removed.");
+			System.out.println("Done.\n");
+		} catch (SQLException e) {
+			System.out.println("Professor does not exist");
+			e.printStackTrace();
+		}
+	}
+	
+	private static void updateProfessor(Connection conn, int profID, String first, String last, int dept, String title, int yearHired) {
+		//first check to see if parameters are valid
+		Statement stmt = null;
+		String checkDeptID = "select * from department where deptID= " + dept;
+		String checkProfID = "select * from professor where professorID= " + profID;
+		
+		System.out.println("Updating professor " + profID + "...");
+
+		try {
+			stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery(checkDeptID);
+			rs = stmt.executeQuery(checkDeptID);
+			if (!rs.next()) {
+				System.out.println("No department with that ID exists.\n");
+				return;
+			}
+			
+			rs = stmt.executeQuery(checkProfID);
+			if (!rs.next()) {
+				System.out.println("No professor with that ID exists.\n");
+				return;
+			}
+			
+			String update = "update professor set "
+					+ "firstName='" + first + "', lastName='" + last + "', dept=" + dept + ", title='" + title + "', yearHired=" + yearHired
+					+ " where professorID=" + profID + ";";
+			stmt.executeUpdate(update);
+			System.out.println("Successfully updated professor " + profID);
+			System.out.println("Done.\n");
+		} catch (SQLException e) {
+			System.out.println("Failed to add new professor.");
 			e.printStackTrace();
 		}
 	}
