@@ -134,6 +134,8 @@ public class DBDemo {
             deleteProfessor(conn, 506);
             // User Request #14: Update professor
             updateProfessor(conn, 500, "Lydia", "Graham", 1000, "Professor", 2000);
+            // User Request #15: Add new student
+            newStudent(conn, "Ray", "Ban", 1000, 18, 1);
 
 		} catch (SQLException e) {
 //			System.out.println("ERROR: Could not connect to the database");
@@ -650,6 +652,33 @@ public class DBDemo {
 			System.out.println("Done.\n");
 		} catch (SQLException e) {
 			System.out.println("Failed to add new professor.");
+			e.printStackTrace();
+		}
+	}
+	
+	private static void newStudent(Connection conn, String first, String last, int dept, int age, int year) {
+		//first check to see if parameters are valid
+		Statement stmt = null;
+		String checkDeptID = "select * from department where deptID= " + dept;
+		
+		System.out.println("Adding new student...");
+
+		try {
+			stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery(checkDeptID);
+			rs = stmt.executeQuery(checkDeptID);
+			if (!rs.next()) {
+				System.out.println("No department with that ID exists.\n");
+				return;
+			}
+			
+			String addProf = "insert into student(firstName, lastName, major, age, year) "
+					+ "values ('" + first + "', '" + last + "', " + dept + ", '" + age + "', " + year + ");";
+			stmt.executeUpdate(addProf);
+			System.out.println("Successfully added " + first + " " + last);
+			System.out.println("Done.\n");
+		} catch (SQLException e) {
+			System.out.println("Failed to add new student.");
 			e.printStackTrace();
 		}
 	}
