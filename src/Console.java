@@ -207,7 +207,9 @@ public class Console {
 		while (true) {
 			System.out.println("View statistics");
 			System.out.println("[1] Total seats between sections of each course");
-			System.out.println("[2] Back");
+			System.out.println("[2] View lowest grade in each section");
+			System.out.println("[3] View average grade for a section");
+			System.out.println("[4] Back");
 			input = scanner.next();
 			
 			switch (input) {
@@ -217,7 +219,16 @@ public class Console {
 				int seats = scanner.nextInt();
 				Functions.classSize(conn, seats);
 				break;
-			case "2":	// back
+			case "2":	// lowest grade
+				Functions.viewLowestGradesBySection(conn);
+				break;
+			case "3":	// average grade
+				System.out.println("Section ID:");
+				checkIfInt();
+				int sectionID = scanner.nextInt();
+				Functions.viewAvgGradeBySection(conn, sectionID);
+				break;
+			case "4":	// back
 				return;
 			default:
 				System.out.println("Invalid input.");
@@ -283,7 +294,7 @@ public class Console {
 				Functions.deleteProfessor(conn, profID);
 				break;
 			case "4":	// back
-				break;
+				return;
 			default:
 				System.out.println("Invalid input.");
 				break;

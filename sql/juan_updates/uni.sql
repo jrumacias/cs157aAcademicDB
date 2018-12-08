@@ -25,7 +25,7 @@ CREATE TABLE Professor (
 
 DROP TABLE IF EXISTS Course;
 CREATE TABLE Course (
-	courseID INT,
+	courseID INT AUTO_INCREMENT,
 	deptID INT,
 	courseNo VARCHAR(4),
 	courseName VARCHAR(50),
@@ -40,7 +40,7 @@ CREATE TABLE Section (
 	term VARCHAR(4),
 	capacity INT,
 	enrolled INT,
-	date DATE,
+	date VARCHAR(4),
 	time TIME,
 	building VARCHAR(3),
 	roomNo INT(3),
@@ -64,7 +64,7 @@ DROP TABLE IF EXISTS Grade;
 CREATE TABLE Grade (
 	sectionID INT,
 	studentID INT,
-	grade VARCHAR(2),
+	grade INT,
 	updatedAt DATETIME,
 	PRIMARY KEY (sectionID, studentID),
 	FOREIGN KEY (sectionID) REFERENCES Section (sectionID) ON DELETE CASCADE,
