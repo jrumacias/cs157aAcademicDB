@@ -19,9 +19,8 @@ CREATE TABLE Professor (
 	lastName VARCHAR(30),
 	dept INT,
 	title VARCHAR(30),
-	yearHired INT,
 	PRIMARY KEY (professorID),
-	FOREIGN KEY (dept) REFERENCES Department (deptID)
+	FOREIGN KEY (dept) REFERENCES Department (deptID) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS Course;
@@ -31,7 +30,7 @@ CREATE TABLE Course (
 	courseNo VARCHAR(4),
 	courseName VARCHAR(50),
 	PRIMARY KEY (courseID),
-	FOREIGN KEY (deptID) REFERENCES Department(deptID)
+	FOREIGN KEY (deptID) REFERENCES Department(deptID) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS Section;
@@ -48,7 +47,7 @@ CREATE TABLE Section (
 	roomNo INT(3),
 	updatedAt DATETIME,
 	PRIMARY KEY (sectionID),
-	FOREIGN KEY(courseID) REFERENCES Course (courseID)
+	FOREIGN KEY(courseID) REFERENCES Course (courseID) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS Student;
@@ -60,7 +59,7 @@ CREATE TABLE Student (
 	year INT,
 	age INT,
 	PRIMARY KEY (studentID),
-	FOREIGN KEY (major) REFERENCES Department (deptID)
+	FOREIGN KEY (major) REFERENCES Department (deptID) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS Grade;
@@ -68,10 +67,10 @@ CREATE TABLE Grade (
 	sectionID INT,
 	studentID INT,
 	grade INT,
-	updatedAt DATETIME,
+	updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (sectionID, studentID),
-	FOREIGN KEY (sectionID) REFERENCES Section (sectionID),
-	FOREIGN KEY (studentID) REFERENCES Student (studentID)
+	FOREIGN KEY (sectionID) REFERENCES Section (sectionID) ON DELETE CASCADE,
+	FOREIGN KEY (studentID) REFERENCES Student (studentID) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS EnrolledIn;
@@ -79,8 +78,8 @@ CREATE TABLE EnrolledIn (
 	sectionID INT,
 	studentID INT,
 	PRIMARY KEY(sectionID, studentID),
-	FOREIGN KEY(sectionID) REFERENCES Section (sectionID),
-	FOREIGN KEY(studentID) REFERENCES Student (studentID)
+	FOREIGN KEY(sectionID) REFERENCES Section (sectionID) ON DELETE CASCADE,
+	FOREIGN KEY(studentID) REFERENCES Student (studentID) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS Teaches;
@@ -88,8 +87,8 @@ CREATE TABLE Teaches (
 	sectionID INT,
 	professorID INT,
 	PRIMARY KEY(sectionID, professorID),
-	FOREIGN KEY(sectionID) REFERENCES Section (sectionID),
-	FOREIGN KEY(professorID) REFERENCES Professor (professorID)
+	FOREIGN KEY(sectionID) REFERENCES Section (sectionID) ON DELETE CASCADE,
+	FOREIGN KEY(professorID) REFERENCES Professor (professorID) ON DELETE CASCADE
 );
 
 
