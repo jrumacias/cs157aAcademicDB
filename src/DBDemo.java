@@ -107,13 +107,16 @@ public class DBDemo {
 			conn = this.getConnection();
 			System.out.println("SUCCESS: Connected to database.");
 			// User Request #1: View all course offerings.
-			viewCourses(conn);
-            System.out.println("\n");
-            // User Request #2: Check grades, specific student.
-			checkGrades(conn, 100017);
-            System.out.println("\n\n");
-            // User Request #3: Search for courses by professor
-            viewCoursesByProf(conn, 14);
+//			viewCourses(conn);
+//            System.out.println("\n");
+//            // User Request #2: Check grades, specific student.
+//			checkGrades(conn, 100017);
+//            System.out.println("\n\n");
+//            // User Request #3: Search for courses by professor
+//            viewCoursesByProf(conn, 14);
+//			System.out.println("\n\n");
+			//Admin Request: Get lowest grades for all sections
+			viewLowestGradesBySection(conn);
 
 		} catch (SQLException e) {
 //			System.out.println("ERROR: Could not connect to the database");
@@ -259,6 +262,38 @@ public class DBDemo {
             e.printStackTrace();
         }
     }
+
+    public static void viewLowestGradesBySection(Connection conn) {
+		try {
+			String viewLowestGrades =
+					"SELECT Student.studentID, Section.sectionID, Grade.grade \r\n" +
+							"FROM Student, Section, Grade \r\n" +
+							"WHERE Student.studentID = Grade.studentID and \r\n" +
+							"Grade.sectionID = Section.sectionID and \r\n" +
+							"grade <= all ( \r\n" +
+							"SELECT grade \r\n" +
+							"FROM Grade \r\n" +
+							"WHERE Section.sectionID = Grade.sectionID and \r\n" +
+							"Student.studentID <> Grade.studentID and \r\n" +
+							"grade is not null);";
+			PreparedStatement pstmt = conn.prepareStatement(viewLowestGrades);
+			ResultSet rs = pstmt.executeQuery();
+
+			while(rs.next()) {
+				String stuID = rs.getString("studentID");
+				String secID = rs.getString("sectionID");
+				String grade = rs.getString("grade");
+
+				System.out.format("%-8s %-8s %-4s",
+						stuID, secID, grade);
+				System.out.println();
+			}
+
+		} catch(SQLException e) {
+			System.out.println("ERROR: Could not view lowest grades");
+			e.printStackTrace();
+		}
+	}
 	
 	/**
 	 * Connect to the DB and do some stuff
