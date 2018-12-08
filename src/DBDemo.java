@@ -122,7 +122,7 @@ public class DBDemo {
             // User Request #8: View a student's schedule
 			Functions.viewSchedule(conn, 100004);
             // User Request #9: View all professors and their sections (also shows null values)
-			Functions.outerJoinSearch(conn);
+			Functions.outerJoinProfSearch(conn);
             // User Request #10: Add new course
 			Functions.newCourse(conn, 9999, 1000, "199A", "New Class");
             // User Request #11: View the total capacity of combined sections of a course (aggregate function)

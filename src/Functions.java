@@ -21,6 +21,22 @@ public class Functions {
 		return exists;
 	}
 	
+	public static boolean profExists(Connection conn, int id) {
+		boolean exists = false;
+		try {
+			String getProf = "select * from professor where professorid=" + id + ";";
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery(getProf);
+			if (rs.next()) {
+				exists = true;
+			}
+		} catch (SQLException e) {
+			System.out.println("Failed to retrieve professor.");
+			e.printStackTrace();
+		}
+		return exists;
+	}
+	
 	public static void viewCourses(Connection conn) {
 		try {
 			String viewCourses = 
@@ -188,35 +204,35 @@ public class Functions {
 		Statement stmt = null;
 		String getStudents = "select * from student where studentID = " + studentID;
 		String getSection = "select * from section where sectionID = " + sectionID;
-		
-		System.out.println("Enrolling student " + studentID + " in section " + sectionID + "...");
 
 		try {
 			stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery(getStudents);
 			if (!rs.next()) {
-				System.out.println("no student with that ID exists");
+				System.out.println("No student with that ID exists.");
 				return;
 			}
 			
 			rs = stmt.executeQuery(getSection);
 			if (!rs.next()) {
-				System.out.println("no section with that ID exists");
+				System.out.println("No section with that ID exists.");
 				return;
 			}
 			if (rs.getInt("capacity") <= rs.getInt("enrolled")) {
-				System.out.println("section is full");
+				System.out.println("Section is full.");
 				return;
 			}
-			
+
+			System.out.println("Enrolling student " + studentID + " in section " + sectionID + "...");
+
 			String add = "insert into enrolledIn values (" + sectionID + "," + studentID + ")";
 			stmt.executeUpdate(add);
-			System.out.println("Student : " + studentID + " successfully enrolled in section : " + sectionID);
+			System.out.println("Student " + studentID + " successfully enrolled in section " + sectionID);
 			System.out.println("Done.\n");
 		} catch (java.sql.SQLIntegrityConstraintViolationException e) {
 			System.out.println("Student is already enrolled in this section.");
 		} catch (SQLException e) {
-			System.out.println("Student does not exist");
+			System.out.println("Student does not exist.");
 			e.printStackTrace();
 		}
 	}
@@ -259,22 +275,29 @@ public class Functions {
 		Statement stmt = null;
 		String getStudents = "select * from student where studentID = " + studentID;
 		String getSection = "select * from section where sectionID = " + sectionID;
+		String checkEnrollment = "SELECT * FROM EnrolledIn WHERE studentID=" + studentID + " AND sectionID=" + sectionID + ";";
 		
-		System.out.println("Dropping student " + studentID + " from section " + sectionID + "...");
-
 		try {
 			stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery(getStudents);
 			if (!rs.next()) {
-				System.out.println("no student with that ID exists");
+				System.out.println("No student with that ID exists.");
 				return;
 			}
 			
 			rs = stmt.executeQuery(getSection);
 			if (!rs.next()) {
-				System.out.println("no section with that ID exists");
+				System.out.println("No section with that ID exists.");
 				return;
 			}
+			
+			rs = stmt.executeQuery(checkEnrollment);
+			if (!rs.next()) {
+				System.out.println("Student is not enrolled in this section.");
+				return;
+			}
+			
+			System.out.println("Dropping student " + studentID + " from section " + sectionID + "...");
 			
 			String drop = "DELETE FROM EnrolledIn WHERE studentID=" + studentID + " AND sectionID=" + sectionID + ";";
 			stmt.executeUpdate(drop);
@@ -332,9 +355,9 @@ public class Functions {
 	 * @param conn
 	 * @param studentID
 	 */
-	public static void outerJoinSearch(Connection conn) {
+	public static void outerJoinProfSearch(Connection conn) {
 		try {
-			String sql = "SELECT lastName, firstName, Section.sectionID, abbreviation, courseNo FROM Professor\r\n" + 
+			String sql = "SELECT Professor.professorID, lastName, firstName, Section.sectionID, abbreviation, courseNo FROM Professor\r\n" + 
 					"LEFT OUTER JOIN Teaches ON Professor.professorID=Teaches.professorID\r\n" + 
 					"LEFT OUTER JOIN Section ON Teaches.sectionID=Section.sectionID\r\n" + 
 					"LEFT OUTER JOIN Course ON Section.courseID=Course.courseID\r\n" + 
@@ -345,18 +368,19 @@ public class Functions {
             System.out.println("Retrieving all professors and their course offerings...");
             System.out.println("-----------------------------------------" +
                     "---------------------------------------------");
-            System.out.println("Last Name \t\t First Name \t\t Section ID \t\t Course");
+            System.out.println("Professor ID \t\t Last Name \t\t First Name \t\t Section ID \t\t Course");
             System.out.println("-----------------------------------------" +
                     "---------------------------------------------");
 			
 			while(rs.next()) {
+				String id = rs.getString("professorID");
 				String last = rs.getString("lastName");
 				String first = rs.getString("firstName");
 				String section = rs.getString("sectionID");
 				String abb = rs.getString("abbreviation");
 				String courseNo = rs.getString("courseNo");
 
-                System.out.println(last + "\t\t" + first + "\t\t" + section + "\t\t" + abb + " " + courseNo);
+                System.out.println(id + "\t\t" + last + "\t\t" + first + "\t\t" + section + "\t\t" + abb + " " + courseNo);
 			}
             System.out.println("-----------------------------------------" +
                     "---------------------------------------------");
