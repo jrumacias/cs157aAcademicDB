@@ -36,10 +36,7 @@ public class Console {
 		switch (input) {
 		case "1":	// student
 			System.out.println("Student ID:");
-			while (!scanner.hasNextInt()) {
-				System.out.println("Please enter a number.");
-				scanner.next();
-			}
+			checkIfInt();
 			id = scanner.nextInt();
 			if (Functions.studentExists(conn, id)) {
 				loggedIn = true;
@@ -50,17 +47,14 @@ public class Console {
 				id = -1;
 			}
 			break;
-			
 		case "2":	// admin
 			System.out.println("Welcome, admin.");
 			id = -1;
 			loggedIn = true;
 			break;
-			
 		case "3":	// quit
 			System.exit(0);
 			break;
-			
 		default:
 			System.out.println("Invalid input.");
 			break;
@@ -109,19 +103,13 @@ public class Console {
 			switch (input) {
 			case "1":	// add
 				System.out.println("Section ID:");
-				while (!scanner.hasNextInt()) {
-					System.out.println("Please enter a number.");
-					scanner.next();
-				}
+				checkIfInt();
 				sectionID = scanner.nextInt();
 				Functions.enroll(conn, id, sectionID);
 				break;
 			case "2":	// drop
 				System.out.println("Section ID:");
-				while (!scanner.hasNextInt()) {
-					System.out.println("Please enter a number.");
-					scanner.next();
-				}
+				checkIfInt();
 				sectionID = scanner.nextInt();
 				Functions.drop(conn, id, sectionID);
 				break;
@@ -163,10 +151,7 @@ public class Console {
 			break;
 		case "4":	// Search for section by professor
 			System.out.println("Professor ID:");
-			while (!scanner.hasNextInt()) {
-				System.out.println("Please enter a number.");
-				scanner.next();
-			}
+			checkIfInt();
 			int profID = scanner.nextInt();
 			if (Functions.profExists(conn, profID)) {
 				Functions.viewCoursesByProf(conn, profID);
@@ -189,16 +174,190 @@ public class Console {
 
 	private void adminMenu() {
 		System.out.println("What would you like to do?");
-		System.out.println("[L]ogout");
+		System.out.println("[1] Modify courses");
+		System.out.println("[2] Modify students");
+		System.out.println("[3] Modify professors");
+		System.out.println("[4] View statistics");
+		System.out.println("[5] Logout");
 		input = scanner.next();
-		switch (input.toUpperCase()) {
-		case "L":	// logout
+		
+		switch (input) {
+		case "1":	// courses
+			editCourses();
+			break;
+		case "2":	// students
+			editStudents();
+			break;
+		case "3":	// professors
+			editProfessors();
+			break;
+		case "4":	// statistics
+			viewStats();
+			break;
+		case "5":	// logout
 			logout();
 			break;
-		
 		default:
 			System.out.println("Invalid input.");
 			break;
+		}
+	}
+	
+	private void viewStats() {
+		while (true) {
+			System.out.println("View statistics");
+			System.out.println("[1] Total seats between sections of each course");
+			System.out.println("[2] Back");
+			input = scanner.next();
+			
+			switch (input) {
+			case "1":	// seats in course
+				System.out.println("Courses with at least how many seats total?");
+				checkIfInt();
+				int seats = scanner.nextInt();
+				Functions.classSize(conn, seats);
+				break;
+			case "2":	// back
+				return;
+			default:
+				System.out.println("Invalid input.");
+				break;
+			}
+		}
+	}
+	
+	private void editProfessors() {
+		while (true) {
+			System.out.println("Modify professors");
+			System.out.println("[1] New professor");
+			System.out.println("[2] Update professor");
+			System.out.println("[3] Delete professor");
+			System.out.println("[4] Back");
+			input = scanner.next();
+			
+			int profID;
+			String first;
+			String last;
+			int deptID;
+			String title;
+			int yearHired;
+			
+			switch (input) {
+			case "1":	// new professor
+				System.out.println("First name:");
+				first = scanner.next();
+				System.out.println("Last name:");
+				last = scanner.next();
+				System.out.println("Department ID:");
+				checkIfInt();
+				deptID = scanner.nextInt();
+				System.out.println("Title:");
+				title = scanner.next();
+				System.out.println("Year hired:");
+				checkIfInt();
+				yearHired = scanner.nextInt();
+				Functions.newProfessor(conn, first, last, deptID, title, yearHired);
+				break;
+			case "2":	// update professor
+				System.out.println("Professor ID:");
+				checkIfInt();
+				profID = scanner.nextInt();
+				System.out.println("First name:");
+				first = scanner.next();
+				System.out.println("Last name:");
+				last = scanner.next();
+				System.out.println("Department ID:");
+				checkIfInt();
+				deptID = scanner.nextInt();
+				System.out.println("Title:");
+				title = scanner.next();
+				System.out.println("Year hired:");
+				checkIfInt();
+				yearHired = scanner.nextInt();
+				Functions.updateProfessor(conn, profID, first, last, deptID, title, yearHired);
+				break;
+			case "3":	// delete professor
+				System.out.println("Professor ID:");
+				checkIfInt();
+				profID = scanner.nextInt();
+				Functions.deleteProfessor(conn, profID);
+				break;
+			case "4":	// back
+				break;
+			default:
+				System.out.println("Invalid input.");
+				break;
+			}
+		}
+	}
+	
+	private void editStudents() {
+		while (true) {
+			System.out.println("Modify students");
+			System.out.println("[1] New student");
+			System.out.println("[2] Back");
+			input = scanner.next();
+			
+			switch (input) {
+			case "1":	// new student
+				System.out.println("First name:");
+				String first = scanner.next();
+				System.out.println("Last name:");
+				String last = scanner.next();
+				System.out.println("Major department ID:");
+				checkIfInt();
+				int deptID = scanner.nextInt();
+				System.out.println("Age:");
+				checkIfInt();
+				int age = scanner.nextInt();
+				System.out.println("Year:");
+				int year = scanner.nextInt();
+				Functions.newStudent(conn, first, last, deptID, age, year);
+				break;
+			case "2":	// back
+				return;
+			default:
+				System.out.println("Invalid input.");
+				break;
+			}
+		}
+	}
+	
+	private void editCourses() {
+		while (true) {
+			System.out.println("Modify courses");
+			System.out.println("[1] New course");
+			System.out.println("[2] Back");
+			input = scanner.next();
+
+			switch (input) {
+			case "1":	// new course
+				System.out.println("Course ID:");
+				checkIfInt();
+				int courseID = scanner.nextInt();
+				System.out.println("Department ID:");
+				checkIfInt();
+				int deptID = scanner.nextInt();
+				System.out.println("Course number:");
+				String courseNo = scanner.next();
+				scanner.nextLine();
+				System.out.println("Course name:");
+				String courseName = scanner.nextLine();
+				Functions.newCourse(conn, courseID, deptID, courseNo, courseName);
+				break;
+			case "2":	// back
+				return;
+			default:
+				System.out.println("Invalid input.");
+				break;
+			}
+		}
+	}
+	
+	private void checkIfInt() {
+		while (!scanner.hasNextInt()) {
+			System.out.println("Please enter a number.");
+			scanner.next();
 		}
 	}
 	

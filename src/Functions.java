@@ -399,8 +399,6 @@ public class Functions {
 		String checkDeptID = "select * from department where deptID= " + deptID;
 		String checkCourseNo = "select * from course where deptID = " + deptID + " and courseNo = '" + courseNo + "';";
 		
-		System.out.println("Adding new course...");
-
 		try {
 			stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery(checkCourseID);
@@ -421,6 +419,8 @@ public class Functions {
 				return;
 			}
 			
+			System.out.println("Adding new course...");
+			
 			String addCourse = "insert into course values (" + courseID + ", " + deptID + ", '" + courseNo + "', '" + courseName + "');";
 			stmt.executeUpdate(addCourse);
 			System.out.println("Successfully added the course \"" + courseName + "\"");
@@ -435,7 +435,7 @@ public class Functions {
 		try {
 			String sql = "SELECT courseID, SUM(capacity) AS totalSeats FROM Section\r\n" + 
 					"GROUP BY courseID\r\n" + 
-					"HAVING totalSeats > ?;";
+					"HAVING totalSeats >= ?;";
 			PreparedStatement pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, minSeats);
 			ResultSet rs = pstmt.executeQuery();
@@ -467,8 +467,6 @@ public class Functions {
 		Statement stmt = null;
 		String checkDeptID = "select * from department where deptID= " + dept;
 		
-		System.out.println("Adding new professor...");
-
 		try {
 			stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery(checkDeptID);
@@ -477,6 +475,8 @@ public class Functions {
 				System.out.println("No department with that ID exists.\n");
 				return;
 			}
+			
+			System.out.println("Adding new professor...");
 			
 			String addProf = "insert into professor(firstName, lastName, dept, title, yearHired) "
 					+ "values ('" + first + "', '" + last + "', " + dept + ", '" + title + "', " + yearHired + ");";
@@ -494,8 +494,6 @@ public class Functions {
 		Statement stmt = null;
 		String getProf = "select * from professor where professorID = " + professorID;
 		
-		System.out.println("Removing professor " + professorID + "...");
-
 		try {
 			stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery(getProf);
@@ -503,6 +501,8 @@ public class Functions {
 				System.out.println("No professor with that ID exists.\n");
 				return;
 			}
+			
+			System.out.println("Removing professor " + professorID + "...");
 			
 			String delete = "DELETE FROM Professor WHERE professorID=" + professorID + ";";
 			stmt.executeUpdate(delete);
@@ -520,8 +520,6 @@ public class Functions {
 		String checkDeptID = "select * from department where deptID= " + dept;
 		String checkProfID = "select * from professor where professorID= " + profID;
 		
-		System.out.println("Updating professor " + profID + "...");
-
 		try {
 			stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery(checkDeptID);
@@ -536,6 +534,8 @@ public class Functions {
 				System.out.println("No professor with that ID exists.\n");
 				return;
 			}
+			
+			System.out.println("Updating professor " + profID + "...");
 			
 			String update = "update professor set "
 					+ "firstName='" + first + "', lastName='" + last + "', dept=" + dept + ", title='" + title + "', yearHired=" + yearHired
@@ -554,8 +554,6 @@ public class Functions {
 		Statement stmt = null;
 		String checkDeptID = "select * from department where deptID= " + dept;
 		
-		System.out.println("Adding new student...");
-
 		try {
 			stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery(checkDeptID);
@@ -564,6 +562,8 @@ public class Functions {
 				System.out.println("No department with that ID exists.\n");
 				return;
 			}
+			
+			System.out.println("Adding new student...");
 			
 			String addProf = "insert into student(firstName, lastName, major, age, year) "
 					+ "values ('" + first + "', '" + last + "', " + dept + ", '" + age + "', " + year + ");";
