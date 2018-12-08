@@ -591,6 +591,8 @@ public class Functions {
 							"grade is not null);";
 			PreparedStatement pstmt = conn.prepareStatement(viewLowestGrades);
 			ResultSet rs = pstmt.executeQuery();
+			
+			System.out.println("Retrieving lowest grades...");
 
 			while(rs.next()) {
 				String stuID = rs.getString("studentID");
@@ -601,6 +603,8 @@ public class Functions {
 						stuID, secID, grade);
 				System.out.println();
 			}
+			
+			System.out.println("Done.\n");
 
 		} catch(SQLException e) {
 			System.out.println("ERROR: Could not view lowest grades");
@@ -610,13 +614,23 @@ public class Functions {
 
 	public static void viewAvgGradeBySection(Connection conn, int sectionID) {
 		try {
+			// check to see if section exists
+			Statement stmt = conn.createStatement();
+			String getSection = "select * from Section where sectionID = " + sectionID;
+			
+			ResultSet rs = stmt.executeQuery(getSection);
+			if (!rs.next()) {
+				System.out.println("No section with that ID exists.\n");
+				return;
+			}
+			
 			String viewAvgGrades =
 					"SELECT sectionID, avg(grade) as avgGrade \r\n" +
 							"FROM Grade \r\n" +
 							"WHERE sectionID = ?;";
 			PreparedStatement pstmt = conn.prepareStatement(viewAvgGrades);
 			pstmt.setInt(1, sectionID);
-			ResultSet rs = pstmt.executeQuery();
+			rs = pstmt.executeQuery();
 
 			System.out.println("Calculating average grade from section " + sectionID + "...");
 
@@ -628,7 +642,6 @@ public class Functions {
 			while(rs.next()) {
 				String avgGrade = rs.getString("avgGrade");
 				String secID = rs.getString("sectionID");
-
 
 				System.out.format("%-14s %-4s ",
 						secID, avgGrade);

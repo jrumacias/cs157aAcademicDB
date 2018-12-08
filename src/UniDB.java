@@ -17,7 +17,7 @@ public class UniDB {
 	/** The port of the MySQL server (default is 3306) */
 	private final static int portNumber = 3308;
 
-	/** The name of the database we are testing with (this default is installed with MySQL) */
+	/** The name of the database we are using */
 	private final static String dbName = "University";
 	
 	/**
