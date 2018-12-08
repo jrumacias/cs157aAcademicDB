@@ -40,7 +40,6 @@ CREATE TABLE Section (
 	term VARCHAR(4),
 	capacity INT,
 	enrolled INT,
-	waitlist INT(3),
 	date DATE,
 	time TIME,
 	building VARCHAR(3),
