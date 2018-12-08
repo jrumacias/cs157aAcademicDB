@@ -254,7 +254,7 @@ public class UniDB {
 
 			System.out.println("-------------------------------------------------");
 			System.out.format("%-17s %-17s %-8s",
-					"Student ID No.", "Section ID No.", "Grade Point");
+					"Section ID No.", "Student ID No.", "Grade Point");
 			System.out.println();
 			System.out.println("-------------------------------------------------");
 
@@ -264,7 +264,7 @@ public class UniDB {
 				String grade = rs.getString("grade");
 
 				System.out.format("%-17s %-17s %-8s",
-						stuID, secID, grade);
+						secID, stuID, grade);
 				System.out.println();
 			}
 			System.out.println("-------------------------------------------------");
