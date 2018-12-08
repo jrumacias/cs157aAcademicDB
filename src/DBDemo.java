@@ -41,19 +41,19 @@ import java.util.Properties;
 public class DBDemo {
 
 	/** The name of the MySQL account to use (or empty for anonymous) */
-	private final String userName = "root";
+	private final static String userName = "root";
 
 	/** The password for the MySQL account (or empty for anonymous) */
-	private final String password = "password";
+	private final static String password = "myroot";
 
 	/** The name of the computer running MySQL */
-	private final String serverName = "localhost";
+	private final static String serverName = "localhost";
 
 	/** The port of the MySQL server (default is 3306) */
-	private final int portNumber = 3306;
+	private final static int portNumber = 3308;
 
 	/** The name of the database we are testing with (this default is installed with MySQL) */
-	private final String dbName = "University";
+	private final static String dbName = "academic_records";
 	
 	/** The name of the table we are testing with */
 	private final String tableName = "JDBC_TEST";
@@ -64,14 +64,14 @@ public class DBDemo {
 	 * @return
 	 * @throws SQLException
 	 */
-	public Connection getConnection() throws SQLException {
+	public static Connection getConnection() throws SQLException {
 		Connection conn = null;
 		Properties connectionProps = new Properties();
-		connectionProps.put("user", this.userName);
-		connectionProps.put("password", this.password);
+		connectionProps.put("user", userName);
+		connectionProps.put("password", password);
 
 		conn = DriverManager.getConnection("jdbc:mysql://"
-				+ this.serverName + ":" + this.portNumber + "/" + this.dbName,
+				+ serverName + ":" + portNumber + "/" + dbName,
 				connectionProps);
 
 		return conn;
@@ -100,28 +100,44 @@ public class DBDemo {
 	 * Connect to MySQL and do some stuff.
 	 */
 	public void run() {
-
 		// Connect to MySQL
 		Connection conn = null;
 		try {
 			conn = this.getConnection();
-			System.out.println("SUCCESS: Connected to database.");
+			System.out.println("SUCCESS: Connected to database.\n");
 			// User Request #1: View all course offerings.
-//			viewCourses(conn);
-//            System.out.println("\n");
-//            // User Request #2: Check grades, specific student.
-//			checkGrades(conn, 100017);
-//            System.out.println("\n\n");
-//            // User Request #3: Search for courses by professor
-//            viewCoursesByProf(conn, 14);
-//			System.out.println("\n\n");
-			//Admin Request: Get lowest grades for all sections
-			viewLowestGradesBySection(conn);
-
+			Functions.viewCourses(conn);
+            // User Request #2: Check grades, specific student.
+			Functions.checkGrades(conn, 100017);
+            // User Request #3: Search for courses by professor
+			Functions.viewCoursesByProf(conn, 400);
+            // User Request #4: Search for courses containing a keyword
+			Functions.searchByKeyword(conn, "course", "courseName", "Introduction");
+            // User Request #5: Enroll student in a section
+			Functions.enroll(conn, 100004, 10004);
+            // User Request #6: Search for courses containing keyword1 or keyword2
+			Functions.unionSearch(conn, "course", "courseName", "courseName", "Biology", "Chemistry");
+            // User Request #7: Drop student from a section
+			Functions.drop(conn, 100004, 10004);
+            // User Request #8: View a student's schedule
+			Functions.viewSchedule(conn, 100004);
+            // User Request #9: View all professors and their sections (also shows null values)
+			Functions.outerJoinProfSearch(conn);
+            // User Request #10: Add new course
+			Functions.newCourse(conn, 9999, 1000, "199A", "New Class");
+            // User Request #11: View the total capacity of combined sections of a course (aggregate function)
+			Functions.classSize(conn, 30);
+            // User Request #12: Add new professor
+			Functions.newProfessor(conn, "Bobby", "Smith", 1000, "Professor", 2018);
+            // User Request #13: Delete professor
+			Functions.deleteProfessor(conn, 506);
+            // User Request #14: Update professor
+			Functions.updateProfessor(conn, 500, "Lydia", "Graham", 1000, "Professor", 2000);
+            // User Request #15: Add new student
+			Functions.newStudent(conn, "Ray", "Ban", 1000, 18, 1);
 		} catch (SQLException e) {
-//			System.out.println("ERROR: Could not connect to the database");
+			System.out.println("ERROR: Could not connect to the database");
 			e.printStackTrace();
-//			return;
 		} finally {
 			try {
 				if (conn != null) {
@@ -133,174 +149,27 @@ public class DBDemo {
 		}
 	}
 	
-	private static void viewCourses(Connection conn) {
-		try {
-			String viewCourses = 
-					"SELECT d.name AS department, d.abbreviation, c.courseNo, c.courseName " + 
-					"FROM Course c, Department d " + 
-					"WHERE c.deptID=d.deptID " + 
-					"ORDER BY d.name, c.courseNo ASC";
-			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery(viewCourses);
-			
-			// TODO: make result format pretty
-            System.out.println("Retrieving all course offerings...");
-
-            System.out.println("-----------------------------------------" +
-                    "---------------------------------------------");
-            System.out.format("%-20s %-18s %-26s",
-                    "Department", "Course Number", "Course Name");
-            System.out.println();
-            System.out.println("-----------------------------------------" +
-                    "---------------------------------------------");
-			while(rs.next()) {
-				String dept = rs.getString("department");
-				String abb = rs.getString("abbreviation");
-				String courseNo = rs.getString("courseNo");
-				String courseName = rs.getString("courseName");
-
-                System.out.format("%-20s %-4s %-13s %-16s",
-                        dept, abb, courseNo, courseName);
-                System.out.println();
-			}
-            System.out.println("-----------------------------------------" +
-                    "---------------------------------------------");
-            System.out.println("Done.\n");
-			rs.close();
-		} catch(SQLException e) {
-			System.out.println("ERROR: Could not view courses");
-			e.printStackTrace();
-		}
-	}
-	
-	private static void checkGrades(Connection conn, int studentID) {
-		try {
-			String sql = "SELECT abbreviation, courseNo, courseName, grade\r\n" + 
-					"FROM Grade\r\n" +
-					"JOIN Section ON Grade.sectionID=Section.sectionID\r\n" + 
-					"JOIN Course ON Section.courseID=Course.courseID\r\n" + 
-					"JOIN Department ON Course.deptID=Department.deptID\r\n" + 
-					"WHERE studentID= ?;";
-			PreparedStatement pstmt = conn.prepareStatement(sql);
-			pstmt.setInt(1, studentID);
-			ResultSet rs = pstmt.executeQuery();
-            System.out.println("Retrieving grades for Student " + studentID + "...");
-
-            System.out.println("-----------------------------------------" +
-                    "---------------------------------------------");
-            System.out.format("%-20s %-46s %-16s",
-                    "Course Number", "Course Name", "Grade");
-            System.out.println();
-            System.out.println("-----------------------------------------" +
-                    "---------------------------------------------");
-			
-			while(rs.next()) {
-				String abb = rs.getString("abbreviation");
-				String courseNo = rs.getString("courseNo");
-				String courseName = rs.getString("courseName");
-				String grade = rs.getString("grade");
-
-                System.out.format("%-2s %-17s %-46s %-16s",
-                        abb, courseNo, courseName, grade);
-                System.out.println();
-			}
-            System.out.println("-----------------------------------------" +
-                    "---------------------------------------------");
-            System.out.println("Done.");
-			rs.close();
-		} catch(SQLException e) {
-			System.out.println("ERROR: Could not check grades");
-			e.printStackTrace();
-		}
-	}
-
-	public static void viewCoursesByProf(Connection conn, int profID) {
-        try {
-            String viewCoursesByProf =
-                    "SELECT c.courseName, t.professorID, c.courseNo, s.sectionID, p.firstName, p.lastName," +
-                            " d.abbreviation \r\n" +
-                            "FROM Section s\r\n" +
-                            "JOIN Professor p\r\n" +
-                            "JOIN (SELECT abbreviation, deptID FROM Department) as d\r\n" +
-                            "JOIN Teaches t ON s.sectionID=t.sectionID \r\n" +
-                            "JOIN Course c ON s.courseID=c.courseID\r\n" +
-                            "WHERE t.professorID= ? AND p.professorID=? AND d.deptID=p.dept;";
-            PreparedStatement pstmt = conn.prepareStatement(viewCoursesByProf);
-            pstmt.setInt(1, profID);
-            pstmt.setInt(2, profID);
-            ResultSet rs = pstmt.executeQuery();
-
-            // TODO: make result format pretty
-            System.out.println("Retrieving all course offerings by Professor " + profID + "...");
-
-            System.out.println("-----------------------------------------" +
-                    "---------------------------------------------");
-            System.out.format("%-8s %-14s %-14s %-14s %-14s %-14s",
-                    "ID No.", "Last Name", "First Name", "Section ID", "Course", "Course Title");
-            System.out.println();
-            System.out.println("-----------------------------------------" +
-                    "---------------------------------------------");
-            while(rs.next()) {
-                String profIDNo = rs.getString("professorID");
-                String profFN = rs.getString("firstName");
-                String profLN = rs.getString("lastName");
-                String secIDNo = rs.getString("sectionID");
-                String courseNo = rs.getString("courseNo");
-                String courseName = rs.getString("courseName");
-                String deptAbb = rs.getString("abbreviation");
-
-                System.out.format("%-8s %-14s %-14s %-14s %-1s %-9s %-1s",
-                        profIDNo, profLN, profFN, secIDNo, deptAbb, courseNo, courseName);
-                System.out.println();
-            }
-            System.out.println("-----------------------------------------" +
-                    "---------------------------------------------");
-            System.out.println("Done.\n");
-            rs.close();
-        } catch(SQLException e) {
-            System.out.println("ERROR: Could not view courses");
-            e.printStackTrace();
-        }
-    }
-
-    public static void viewLowestGradesBySection(Connection conn) {
-		try {
-			String viewLowestGrades =
-					"SELECT Student.studentID, Section.sectionID, Grade.grade \r\n" +
-							"FROM Student, Section, Grade \r\n" +
-							"WHERE Student.studentID = Grade.studentID and \r\n" +
-							"Grade.sectionID = Section.sectionID and \r\n" +
-							"grade <= all ( \r\n" +
-							"SELECT grade \r\n" +
-							"FROM Grade \r\n" +
-							"WHERE Section.sectionID = Grade.sectionID and \r\n" +
-							"Student.studentID <> Grade.studentID and \r\n" +
-							"grade is not null);";
-			PreparedStatement pstmt = conn.prepareStatement(viewLowestGrades);
-			ResultSet rs = pstmt.executeQuery();
-
-			while(rs.next()) {
-				String stuID = rs.getString("studentID");
-				String secID = rs.getString("sectionID");
-				String grade = rs.getString("grade");
-
-				System.out.format("%-8s %-8s %-4s",
-						stuID, secID, grade);
-				System.out.println();
-			}
-
-		} catch(SQLException e) {
-			System.out.println("ERROR: Could not view lowest grades");
-			e.printStackTrace();
-		}
-	}
-	
 	/**
 	 * Connect to the DB and do some stuff
 	 */
 	public static void main(String[] args) {
-		DBDemo app = new DBDemo();
-		app.run();
+		Connection conn = null;
+		try {
+			conn = getConnection();
+			Console console = new Console(conn);
+			console.run();
+		} catch (SQLException e) {
+			System.out.println("ERROR: Could not connect to the database");
+			e.printStackTrace();
+		} finally {
+			try {
+				if (conn != null) {
+					conn.close();
+				}
+			} catch(SQLException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 }
