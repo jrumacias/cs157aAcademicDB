@@ -8,7 +8,7 @@ public class Functions {
 	public static boolean studentExists(Connection conn, int id) {
 		boolean exists = false;
 		try {
-			String getStudent = "select * from student where studentid=" + id + ";";
+			String getStudent = "select * from Student where studentID=" + id + ";";
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery(getStudent);
 			if (rs.next()) {
@@ -24,7 +24,7 @@ public class Functions {
 	public static boolean profExists(Connection conn, int id) {
 		boolean exists = false;
 		try {
-			String getProf = "select * from professor where professorid=" + id + ";";
+			String getProf = "select * from Professor where professorID=" + id + ";";
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery(getProf);
 			if (rs.next()) {
@@ -202,8 +202,8 @@ public class Functions {
 	public static void enroll(Connection con, int studentID, int sectionID) {
 		//first check to see if studentID is valid
 		Statement stmt = null;
-		String getStudents = "select * from student where studentID = " + studentID;
-		String getSection = "select * from section where sectionID = " + sectionID;
+		String getStudents = "select * from Student where studentID = " + studentID;
+		String getSection = "select * from Section where sectionID = " + sectionID;
 
 		try {
 			stmt = con.createStatement();
@@ -225,7 +225,7 @@ public class Functions {
 
 			System.out.println("Enrolling student " + studentID + " in section " + sectionID + "...");
 
-			String add = "insert into enrolledIn values (" + sectionID + "," + studentID + ")";
+			String add = "insert into EnrolledIn values (" + sectionID + "," + studentID + ")";
 			stmt.executeUpdate(add);
 			System.out.println("Student " + studentID + " successfully enrolled in section " + sectionID);
 			System.out.println("Done.\n");
@@ -273,8 +273,8 @@ public class Functions {
 	public static void drop(Connection conn, int studentID, int sectionID) {
 		//first check to see if studentID is valid
 		Statement stmt = null;
-		String getStudents = "select * from student where studentID = " + studentID;
-		String getSection = "select * from section where sectionID = " + sectionID;
+		String getStudents = "select * from Student where studentID = " + studentID;
+		String getSection = "select * from Section where sectionID = " + sectionID;
 		String checkEnrollment = "SELECT * FROM EnrolledIn WHERE studentID=" + studentID + " AND sectionID=" + sectionID + ";";
 		
 		try {
@@ -395,9 +395,9 @@ public class Functions {
 	public static void newCourse(Connection conn, int courseID, int deptID, String courseNo, String courseName) {
 		//first check to see if parameters are valid
 		Statement stmt = null;
-		String checkCourseID = "select * from course where courseID = " + courseID;
-		String checkDeptID = "select * from department where deptID= " + deptID;
-		String checkCourseNo = "select * from course where deptID = " + deptID + " and courseNo = '" + courseNo + "';";
+		String checkCourseID = "select * from Course where courseID = " + courseID;
+		String checkDeptID = "select * from Department where deptID= " + deptID;
+		String checkCourseNo = "select * from Course where deptID = " + deptID + " and courseNo = '" + courseNo + "';";
 		
 		try {
 			stmt = conn.createStatement();
@@ -421,7 +421,7 @@ public class Functions {
 			
 			System.out.println("Adding new course...");
 			
-			String addCourse = "insert into course values (" + courseID + ", " + deptID + ", '" + courseNo + "', '" + courseName + "');";
+			String addCourse = "insert into Course values (" + courseID + ", " + deptID + ", '" + courseNo + "', '" + courseName + "');";
 			stmt.executeUpdate(addCourse);
 			System.out.println("Successfully added the course \"" + courseName + "\"");
 			System.out.println("Done.\n");
@@ -465,7 +465,7 @@ public class Functions {
 	public static void newProfessor(Connection conn, String first, String last, int dept, String title, int yearHired) {
 		//first check to see if parameters are valid
 		Statement stmt = null;
-		String checkDeptID = "select * from department where deptID= " + dept;
+		String checkDeptID = "select * from Department where deptID= " + dept;
 		
 		try {
 			stmt = conn.createStatement();
@@ -478,7 +478,7 @@ public class Functions {
 			
 			System.out.println("Adding new professor...");
 			
-			String addProf = "insert into professor(firstName, lastName, dept, title, yearHired) "
+			String addProf = "insert into Professor(firstName, lastName, dept, title, yearHired) "
 					+ "values ('" + first + "', '" + last + "', " + dept + ", '" + title + "', " + yearHired + ");";
 			stmt.executeUpdate(addProf);
 			System.out.println("Successfully added " + title + " " + first + " " + last + "\"");
@@ -492,7 +492,7 @@ public class Functions {
 	public static void deleteProfessor(Connection conn, int professorID) {
 		//first check to see if professorID is valid
 		Statement stmt = null;
-		String getProf = "select * from professor where professorID = " + professorID;
+		String getProf = "select * from Professor where professorID = " + professorID;
 		
 		try {
 			stmt = conn.createStatement();
@@ -517,8 +517,8 @@ public class Functions {
 	public static void updateProfessor(Connection conn, int profID, String first, String last, int dept, String title, int yearHired) {
 		//first check to see if parameters are valid
 		Statement stmt = null;
-		String checkDeptID = "select * from department where deptID= " + dept;
-		String checkProfID = "select * from professor where professorID= " + profID;
+		String checkDeptID = "select * from Department where deptID= " + dept;
+		String checkProfID = "select * from Professor where professorID= " + profID;
 		
 		try {
 			stmt = conn.createStatement();
@@ -537,7 +537,7 @@ public class Functions {
 			
 			System.out.println("Updating professor " + profID + "...");
 			
-			String update = "update professor set "
+			String update = "update Professor set "
 					+ "firstName='" + first + "', lastName='" + last + "', dept=" + dept + ", title='" + title + "', yearHired=" + yearHired
 					+ " where professorID=" + profID + ";";
 			stmt.executeUpdate(update);
@@ -552,7 +552,7 @@ public class Functions {
 	public static void newStudent(Connection conn, String first, String last, int dept, int age, int year) {
 		//first check to see if parameters are valid
 		Statement stmt = null;
-		String checkDeptID = "select * from department where deptID= " + dept;
+		String checkDeptID = "select * from Department where deptID= " + dept;
 		
 		try {
 			stmt = conn.createStatement();
@@ -565,7 +565,7 @@ public class Functions {
 			
 			System.out.println("Adding new student...");
 			
-			String addProf = "insert into student(firstName, lastName, major, age, year) "
+			String addProf = "insert into Student(firstName, lastName, major, age, year) "
 					+ "values ('" + first + "', '" + last + "', " + dept + ", '" + age + "', " + year + ");";
 			stmt.executeUpdate(addProf);
 			System.out.println("Successfully added " + first + " " + last);

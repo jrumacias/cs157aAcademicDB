@@ -12,16 +12,16 @@ public class UniDB {
 	private final static String userName = "root";
 
 	/** The password for the MySQL account (or empty for anonymous) */
-	private final static String password = "myroot";
+	private final static String password = "password";
 
 	/** The name of the computer running MySQL */
 	private final static String serverName = "localhost";
 
 	/** The port of the MySQL server (default is 3306) */
-	private final static int portNumber = 3308;
+	private final static int portNumber = 3306;
 
 	/** The name of the database we are testing with (this default is installed with MySQL) */
-	private final static String dbName = "academic_records";
+	private final static String dbName = "University";
 	
 	/** The name of the table we are testing with */
 	private final String tableName = "JDBC_TEST";
