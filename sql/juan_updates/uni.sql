@@ -40,12 +40,10 @@ CREATE TABLE Section (
 	term VARCHAR(4),
 	capacity INT,
 	enrolled INT,
-	waitlist INT(3),
 	date DATE,
 	time TIME,
 	building VARCHAR(3),
 	roomNo INT(3),
-	updatedAt DATETIME,
 	PRIMARY KEY (sectionID),
 	FOREIGN KEY(courseID) REFERENCES Course (courseID) ON DELETE CASCADE
 );
@@ -91,7 +89,6 @@ CREATE TABLE Teaches (
 	FOREIGN KEY(professorID) REFERENCES Professor (professorID) ON DELETE CASCADE
 );
 
-
 LOAD DATA LOCAL INFILE '/~/departments.txt' INTO TABLE Department;
 LOAD DATA LOCAL INFILE '/~/professors.txt' INTO TABLE Professor;
 LOAD DATA LOCAL INFILE '/~/courses.txt' INTO TABLE Course;
@@ -100,3 +97,29 @@ LOAD DATA LOCAL INFILE '/~/students.txt' INTO TABLE Student;
 LOAD DATA LOCAL INFILE '/~/grades.txt' INTO TABLE Grade;
 LOAD DATA LOCAL INFILE '/~/enrolledin.txt' INTO TABLE EnrolledIn;
 LOAD DATA LOCAL INFILE '/~/teaches.txt' INTO TABLE Teaches;
+
+DROP TRIGGER IF EXISTS T1;
+DELIMITER //
+CREATE TRIGGER T1
+AFTER INSERT ON EnrolledIn
+FOR EACH ROW
+BEGIN
+UPDATE Section
+SET enrolled = enrolled + 1
+WHERE sectionId = NEW.sectionId;
+END;
+//
+DELIMITER ;
+
+DROP TRIGGER IF EXISTS T2;
+DELIMITER //
+CREATE TRIGGER T2
+AFTER DELETE ON EnrolledIn
+FOR EACH ROW
+BEGIN
+UPDATE Section
+SET enrolled = enrolled - 1
+WHERE sectionId = OLD.sectionId;
+END;
+//
+DELIMITER ;

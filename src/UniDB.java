@@ -6,39 +6,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
-/**
- * This class demonstrates how to connect to MySQL and run some basic commands.
- * 
- * In order to use this, you have to download the Connector/J driver and add
- * its .jar file to your build path.  You can find it here:
- * 
- * http://dev.mysql.com/downloads/connector/j/
- * 
- * You will see the following exception if it's not in your class path:
- * 
- * java.sql.SQLException: No suitable driver found for jdbc:mysql://localhost:3306/
- * 
- * To add it to your class path:
- * 1. Right click on your project
- * 2. Go to Build Path -> Add External Archives...
- * 3. Select the file mysql-connector-java-5.1.24-bin.jar
- *    NOTE: If you have a different version of the .jar file, the name may be
- *    a little different.
- *    
- * The user name and password are both "root", which should be correct if you followed
- * the advice in the MySQL tutorial. If you want to use different credentials, you can
- * change them below. 
- * 
- * You will get the following exception if the credentials are wrong:
- * 
- * java.sql.SQLException: Access denied for user 'userName'@'localhost' (using password: YES)
- * 
- * You will instead get the following exception if MySQL isn't installed, isn't
- * running, or if your serverName or portNumber are wrong:
- * 
- * java.net.ConnectException: Connection refused
- */
-public class DBDemo {
+public class UniDB {
 
 	/** The name of the MySQL account to use (or empty for anonymous) */
 	private final static String userName = "root";
