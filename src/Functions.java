@@ -607,4 +607,39 @@ public class Functions {
 			e.printStackTrace();
 		}
 	}
+
+	public static void viewAvgGradeBySection(Connection conn, int sectionID) {
+		try {
+			String viewAvgGrades =
+					"SELECT sectionID, avg(grade) as avgGrade \r\n" +
+							"FROM Grade \r\n" +
+							"WHERE sectionID = ?;";
+			PreparedStatement pstmt = conn.prepareStatement(viewAvgGrades);
+			pstmt.setInt(1, sectionID);
+			ResultSet rs = pstmt.executeQuery();
+
+			System.out.println("Calculating average grade from section " + sectionID + "...");
+
+			System.out.println("-----------------------------");
+			System.out.format("%-14s %-4s ",
+					"Section ID", "Average Grade");
+			System.out.println();
+			System.out.println("-----------------------------");
+			while(rs.next()) {
+				String avgGrade = rs.getString("avgGrade");
+				String secID = rs.getString("sectionID");
+
+
+				System.out.format("%-14s %-4s ",
+						secID, avgGrade);
+				System.out.println();
+			}
+			System.out.println("-----------------------------");
+			System.out.println("Done.\n");
+			rs.close();
+		} catch(SQLException e) {
+			System.out.println("ERROR: Could not calculate average.");
+			e.printStackTrace();
+		}
+	}
 }
