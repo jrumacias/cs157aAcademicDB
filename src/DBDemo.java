@@ -107,14 +107,14 @@ public class DBDemo {
 			conn = this.getConnection();
 			System.out.println("SUCCESS: Connected to database.");
 			// User Request #1: View all course offerings.
-//			viewCourses(conn);
-//            System.out.println("\n");
-//            // User Request #2: Check grades, specific student.
-//			checkGrades(conn, 100017);
-//            System.out.println("\n\n");
-//            // User Request #3: Search for courses by professor
-//            viewCoursesByProf(conn, 14);
-//			System.out.println("\n\n");
+			viewCourses(conn);
+            System.out.println("\n");
+            // User Request #2: Check grades, specific student.
+			checkGrades(conn, 100017);
+            System.out.println("\n\n");
+            // User Request #3: Search for courses by professor
+            viewCoursesByProf(conn, 14);
+			System.out.println("\n\n");
 			//Admin Request: Get lowest grades for all sections
 			viewLowestGradesBySection(conn);
 
@@ -230,15 +230,14 @@ public class DBDemo {
             pstmt.setInt(2, profID);
             ResultSet rs = pstmt.executeQuery();
 
-            // TODO: make result format pretty
             System.out.println("Retrieving all course offerings by Professor " + profID + "...");
 
             System.out.println("-----------------------------------------" +
-                    "---------------------------------------------");
+                    "---------------------------------------------------------");
             System.out.format("%-8s %-14s %-14s %-14s %-14s %-14s",
                     "ID No.", "Last Name", "First Name", "Section ID", "Course", "Course Title");
             System.out.println();
-            System.out.println("-----------------------------------------" +
+            System.out.println("-----------------------------------------------------" +
                     "---------------------------------------------");
             while(rs.next()) {
                 String profIDNo = rs.getString("professorID");
@@ -254,7 +253,7 @@ public class DBDemo {
                 System.out.println();
             }
             System.out.println("-----------------------------------------" +
-                    "---------------------------------------------");
+                    "---------------------------------------------------------");
             System.out.println("Done.\n");
             rs.close();
         } catch(SQLException e) {
@@ -279,15 +278,25 @@ public class DBDemo {
 			PreparedStatement pstmt = conn.prepareStatement(viewLowestGrades);
 			ResultSet rs = pstmt.executeQuery();
 
+			System.out.println("Retrieving lowest grade(s) from all sections...");
+
+			System.out.println("-------------------------------------------------");
+			System.out.format("%-17s %-17s %-8s",
+					"Student ID No.", "Section ID No.", "Grade Point");
+			System.out.println();
+			System.out.println("-------------------------------------------------");
+
 			while(rs.next()) {
 				String stuID = rs.getString("studentID");
 				String secID = rs.getString("sectionID");
 				String grade = rs.getString("grade");
 
-				System.out.format("%-8s %-8s %-4s",
+				System.out.format("%-17s %-17s %-8s",
 						stuID, secID, grade);
 				System.out.println();
 			}
+			System.out.println("-------------------------------------------------");
+			System.out.println("Done.");
 
 		} catch(SQLException e) {
 			System.out.println("ERROR: Could not view lowest grades");
