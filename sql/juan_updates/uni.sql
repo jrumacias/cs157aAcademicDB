@@ -44,7 +44,6 @@ CREATE TABLE Section (
 	time TIME,
 	building VARCHAR(3),
 	roomNo INT(3),
-	updatedAt DATETIME,
 	PRIMARY KEY (sectionID),
 	FOREIGN KEY(courseID) REFERENCES Course (courseID) ON DELETE CASCADE
 );
