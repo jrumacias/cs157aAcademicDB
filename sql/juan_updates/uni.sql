@@ -133,26 +133,26 @@ DELIMITER ;
 
 DROP PROCEDURE IF EXISTS addGrades;
 DELIMITER //
-CREATE PROCEDURE addGrades(d_value Date)
+CREATE PROCEDURE addGrades(d_value TIMESTAMP)
 BEGIN
 INSERT INTO Archive
 SELECT sectionID, studentID, grade FROM GRADE
-WHERE Date(updatedAt) < d_value;
+WHERE TIMESTAMP(updatedAt) < d_value;
 END//
 DELIMITER ;
 
 DROP PROCEDURE IF EXISTS deleteGrades;
 DELIMITER //
-CREATE PROCEDURE deleteGrades(d_value Date)
+CREATE PROCEDURE deleteGrades(d_value TIMESTAMP)
 BEGIN 
 DELETE FROM GRADE
-WHERE Date(updatedAt) < d_value;
+WHERE TIMESTAMP(updatedAt) < d_value;
 END//
 DELIMITER ;
 
 DROP PROCEDURE IF EXISTS ArchiveGrade;
 DELIMITER //
-CREATE PROCEDURE ArchiveGrade(cutoffDate Date)
+CREATE PROCEDURE ArchiveGrade(cutoffDate TIMESTAMP)
 BEGIN
 CALL addGrades(cutoffDate);
 CALL deleteGrades(cutoffDate);
