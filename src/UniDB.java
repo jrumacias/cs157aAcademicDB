@@ -1,70 +1,84 @@
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.Properties;
 
 public class UniDB {
 
-	static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
+    // JDBC driver name and database URL
+    static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
+    static final String DB_URL = "jdbc:mysql://localhost:3306/university";
 
-	/** The name of the MySQL account to use (or empty for anonymous) */
-	private final static String userName = "root";
-
-	/** The password for the MySQL account (or empty for anonymous) */
-	private final static String password = "password";
-
-	/** The name of the computer running MySQL */
-	private final static String serverName = "localhost";
-
-	/** The port of the MySQL server (default is 3306) */
-	private final static int portNumber = 3306;
-
-	/** The name of the database we are using */
-	private final static String dbName = "University";
+    //  Database credentials
+    static final String USER = "root";
+    static final String PASS = "password";
 
 
-	/**
-	 * Get a new database connection
-	 * 
-	 * @return
-	 * @throws SQLException
-	 */
-	public static Connection getConnection() throws SQLException {
+    /**
+     * The name of the computer running MySQL
+     */
+    private final static String serverName = "localhost";
 
-		Connection conn = null;
-		Properties connectionProps = new Properties();
-		connectionProps.put("user", userName);
-		connectionProps.put("password", password);
+    /**
+     * The port of the MySQL server (default is 3306)
+     */
+    private final static int portNumber = 3306;
 
-		conn = DriverManager.getConnection("jdbc:mysql://"
-				+ serverName + ":" + portNumber + "/" + dbName,
-				connectionProps);
+    /**
+     * The name of the database we are using
+     */
+    private final static String dbName = "university";
 
-		return conn;
-	}
 
-	/**
-	 * Connect to the DB and do some stuff
-	 */
-	public static void main(String[] args) throws ClassNotFoundException {
-		Connection conn = null;
-		try {
-			Class.forName("com.mysql.jdbc.Driver");
-			conn = getConnection();
-			Console console = new Console(conn);
-			console.run();
-		} catch (SQLException e) {
-			System.out.println("ERROR: Could not connect to the database");
-			e.printStackTrace();
-		} finally {
-			try {
-				if (conn != null) {
-					conn.close();
-				}
-			} catch(SQLException e) {
-				e.printStackTrace();
-			}
-		}
-	}
+    /**
+     * Get a new database connection
+     *
+     * @return
+     * @throws SQLException
+     */
+    public static Connection getConnection() throws SQLException {
+
+        Connection conn = null;
+        Properties connectionProps = new Properties();
+//		connectionProps.put("user", userName);
+//		connectionProps.put("password", password);
+
+        conn = DriverManager.getConnection("jdbc:mysql://"
+                        + serverName + ":" + portNumber + "/" + dbName,
+                connectionProps);
+
+        return conn;
+    }
+
+    /**
+     * Connect to the DB and do some stuff
+     */
+    public static void main(String[] args) throws ClassNotFoundException {
+        Connection conn = null;
+        try {
+            //STEP 2: Register JDBC driver
+            Class.forName("com.mysql.cj.jdbc.Driver");
+
+            //STEP 3: Open a connection
+//			conn = getConnection();
+            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+
+            Console console = new Console(conn);
+            console.run();
+        } catch (SQLException se) {
+            //Handle errors for JDBC
+            System.out.println("ERROR: Could not connect to the database");
+            se.printStackTrace();
+        } catch (Exception e) {
+            //Handle errors for Class.forName
+            e.printStackTrace();
+        } finally {
+            try {
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
 }
