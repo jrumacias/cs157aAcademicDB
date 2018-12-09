@@ -147,7 +147,8 @@ public class Console {
 			String input1 = scanner.next();
 			System.out.println("Keyword 2:");
 			String input2 = scanner.next();
-			Functions.unionSearch(conn, "course", "courseName", "courseName", input1, input2);
+			Functions.unionSearch(conn, "course", "courseName", "courseName",
+					input1, input2);
 			break;
 		case "4":	// Search for section by professor
 			System.out.println("Professor ID:");

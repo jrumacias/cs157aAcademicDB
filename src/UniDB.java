@@ -5,6 +5,8 @@ import java.util.Properties;
 
 public class UniDB {
 
+	static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
+
 	/** The name of the MySQL account to use (or empty for anonymous) */
 	private final static String userName = "root";
 
@@ -19,7 +21,8 @@ public class UniDB {
 
 	/** The name of the database we are using */
 	private final static String dbName = "University";
-	
+
+
 	/**
 	 * Get a new database connection
 	 * 
@@ -27,6 +30,7 @@ public class UniDB {
 	 * @throws SQLException
 	 */
 	public static Connection getConnection() throws SQLException {
+
 		Connection conn = null;
 		Properties connectionProps = new Properties();
 		connectionProps.put("user", userName);
@@ -42,9 +46,10 @@ public class UniDB {
 	/**
 	 * Connect to the DB and do some stuff
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws ClassNotFoundException {
 		Connection conn = null;
 		try {
+			Class.forName("com.mysql.jdbc.Driver");
 			conn = getConnection();
 			Console console = new Console(conn);
 			console.run();

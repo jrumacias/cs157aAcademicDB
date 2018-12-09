@@ -238,7 +238,8 @@ public class Functions {
 	}
 	
 	//searches for courses that contain either key1 or key2
-	public static void unionSearch(Connection con, String table, String firstColumn, String secondColumn, String firstKey, String secondKey) {
+	public static void unionSearch(Connection con, String table, String firstColumn, String secondColumn,
+								   String firstKey, String secondKey) {
 		Statement s1 = null;
 		final String UNION = "union";
 		String q1 = "select * from " + table + " WHERE " + firstColumn + " LIKE " + "\'%"+ firstKey + "%\'";
@@ -249,7 +250,8 @@ public class Functions {
 			//System.out.println(q1 + UNION + q2);
 			ResultSet rs = s1.executeQuery(q1 + " " + UNION + " "+ q2);
 			
-			System.out.println("Retrieving all course offerings containing the keyword \"" + firstKey + "\" or \"" + secondKey + "\"...");
+			System.out.println("Retrieving all course offerings containing the keyword \"" + firstKey + "\" or \"" +
+					secondKey + "\"...");
             System.out.println("-----------------------------------------" +
                     "---------------------------------------------");
 			
@@ -275,7 +277,8 @@ public class Functions {
 		Statement stmt = null;
 		String getStudents = "select * from Student where studentID = " + studentID;
 		String getSection = "select * from Section where sectionID = " + sectionID;
-		String checkEnrollment = "SELECT * FROM EnrolledIn WHERE studentID=" + studentID + " AND sectionID=" + sectionID + ";";
+		String checkEnrollment = "SELECT * FROM EnrolledIn WHERE studentID=" + studentID + " AND sectionID=" +
+				sectionID + ";";
 		
 		try {
 			stmt = conn.createStatement();
@@ -337,7 +340,8 @@ public class Functions {
 				String building = rs.getString("building");
 				String roomNo = rs.getString("roomNo");
 
-                System.out.println(section + "\t\t" + abb + " " + courseNo + "\t\t" + courseName + "\t\t" + date + "\t\t" + building + " " + roomNo);
+                System.out.println(section + "\t\t" + abb + " " + courseNo + "\t\t" + courseName + "\t\t" + date +
+						"\t\t" + building + " " + roomNo);
 			}
             System.out.println("-----------------------------------------" +
                     "---------------------------------------------");
@@ -357,7 +361,8 @@ public class Functions {
 	 */
 	public static void outerJoinProfSearch(Connection conn) {
 		try {
-			String sql = "SELECT Professor.professorID, lastName, firstName, Section.sectionID, abbreviation, courseNo FROM Professor\r\n" + 
+			String sql = "SELECT Professor.professorID, lastName, firstName, Section.sectionID, abbreviation, " +
+					"courseNo FROM Professor\r\n" +
 					"LEFT OUTER JOIN Teaches ON Professor.professorID=Teaches.professorID\r\n" + 
 					"LEFT OUTER JOIN Section ON Teaches.sectionID=Section.sectionID\r\n" + 
 					"LEFT OUTER JOIN Course ON Section.courseID=Course.courseID\r\n" + 
@@ -380,7 +385,8 @@ public class Functions {
 				String abb = rs.getString("abbreviation");
 				String courseNo = rs.getString("courseNo");
 
-                System.out.println(id + "\t\t" + last + "\t\t" + first + "\t\t" + section + "\t\t" + abb + " " + courseNo);
+                System.out.println(id + "\t\t" + last + "\t\t" + first + "\t\t" + section + "\t\t" + abb + " " +
+						courseNo);
 			}
             System.out.println("-----------------------------------------" +
                     "---------------------------------------------");
@@ -421,7 +427,8 @@ public class Functions {
 			
 			System.out.println("Adding new course...");
 			
-			String addCourse = "insert into Course values (" + courseID + ", " + deptID + ", '" + courseNo + "', '" + courseName + "');";
+			String addCourse = "insert into Course values (" + courseID + ", " + deptID + ", '" + courseNo + "', '" +
+					courseName + "');";
 			stmt.executeUpdate(addCourse);
 			System.out.println("Successfully added the course \"" + courseName + "\"");
 			System.out.println("Done.\n");
@@ -514,7 +521,8 @@ public class Functions {
 		}
 	}
 	
-	public static void updateProfessor(Connection conn, int profID, String first, String last, int dept, String title, int yearHired) {
+	public static void updateProfessor(Connection conn, int profID, String first, String last, int dept, String title,
+									   int yearHired) {
 		//first check to see if parameters are valid
 		Statement stmt = null;
 		String checkDeptID = "select * from Department where deptID= " + dept;
@@ -538,7 +546,8 @@ public class Functions {
 			System.out.println("Updating professor " + profID + "...");
 			
 			String update = "update Professor set "
-					+ "firstName='" + first + "', lastName='" + last + "', dept=" + dept + ", title='" + title + "', yearHired=" + yearHired
+					+ "firstName='" + first + "', lastName='" + last + "', dept=" + dept + ", title='" + title +
+					"', yearHired=" + yearHired
 					+ " where professorID=" + profID + ";";
 			stmt.executeUpdate(update);
 			System.out.println("Successfully updated professor " + profID);

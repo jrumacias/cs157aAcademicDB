@@ -89,6 +89,13 @@ CREATE TABLE Teaches (
 	FOREIGN KEY(professorID) REFERENCES Professor (professorID) ON DELETE CASCADE
 );
 
+DROP TABLE IF EXISTS Archive;
+CREATE TABLE Archive (
+	sectionID INT,
+	studentID INT,
+	grade INT
+);
+
 LOAD DATA LOCAL INFILE '/~/departments.txt' INTO TABLE Department;
 LOAD DATA LOCAL INFILE '/~/professors.txt' INTO TABLE Professor;
 LOAD DATA LOCAL INFILE '/~/courses.txt' INTO TABLE Course;
@@ -122,4 +129,32 @@ SET enrolled = enrolled - 1
 WHERE sectionId = OLD.sectionId;
 END;
 //
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS addGrades;
+DELIMITER //
+CREATE PROCEDURE addGrades(d_value Date)
+BEGIN
+INSERT INTO Archive
+SELECT sectionID, studentID, grade FROM GRADE
+WHERE Date(updatedAt) < d_value;
+END//
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS deleteGrades;
+DELIMITER //
+CREATE PROCEDURE deleteGrades(d_value Date)
+BEGIN 
+DELETE FROM GRADE
+WHERE Date(updatedAt) < d_value;
+END//
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS ArchiveGrade;
+DELIMITER //
+CREATE PROCEDURE ArchiveGrade(cutoffDate Date)
+BEGIN
+CALL addGrades(cutoffDate);
+CALL deleteGrades(cutoffDate);
+END//
 DELIMITER ;
