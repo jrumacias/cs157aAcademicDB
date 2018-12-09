@@ -4,12 +4,14 @@ import java.util.Properties;
 public class UniDB {
 
     // JDBC driver name and database URL
-    static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
-    static final String DB_URL = "jdbc:mysql://localhost:3306/university";
+    static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
+    static final String DB_URL = "jdbc:mysql://localhost/university";
 
     //  Database credentials
     static final String USER = "root";
     static final String PASS = "password";
+    static final String userName = "root";
+    static final String password = "password";
 
 
     /**
@@ -34,12 +36,13 @@ public class UniDB {
      * @return
      * @throws SQLException
      */
-    public static Connection getConnection() throws SQLException {
-
+    public static Connection getConnection() throws SQLException, ClassNotFoundException {
+        //Register JDBC driver
+        Class.forName("com.mysql.cj.jdbc.Driver");
         Connection conn = null;
         Properties connectionProps = new Properties();
-//		connectionProps.put("user", userName);
-//		connectionProps.put("password", password);
+		connectionProps.put("user", userName);
+		connectionProps.put("password", password);
 
         conn = DriverManager.getConnection("jdbc:mysql://"
                         + serverName + ":" + portNumber + "/" + dbName,
@@ -54,12 +57,9 @@ public class UniDB {
     public static void main(String[] args) throws ClassNotFoundException {
         Connection conn = null;
         try {
-            //STEP 2: Register JDBC driver
-            Class.forName("com.mysql.cj.jdbc.Driver");
-
-            //STEP 3: Open a connection
-//			conn = getConnection();
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            //Open a connection
+			conn = getConnection();
+//            conn = DriverManager.getConnection(DB_URL, USER, PASS);
 
             Console console = new Console(conn);
             console.run();
